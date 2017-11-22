@@ -26,9 +26,26 @@
 
 ;;; Code:
 
+(defvar aml--marker-zipper '(nil . nil))
+(defvar aml--marker-before nil)
 
+(defun aml--add-left (zipper item)
+  (setcar zipper (cons item (car zipper))))
 
+(defun aml--positions-are-close (a b)
+  (>= 1 (abs (- (line-number-at-pos a) (line-number-at-pos b)))))
 
+(defun aml--pre-command ()
+  (setq aml--marker-before (point-marker)))
+
+(defun aml--post-command ()
+  (let ((current-position (point))
+        (previous-position (marker-position aml--marker-before)))
+    (unless (aml--positions-are-close previous-position current-position)
+      (aml--add-left aml--marker-zipper aml--marker-before))))
+
+(add-hook 'pre-command-hook #'aml--pre-command)
+(add-hook 'post-command-hook #'aml--post-command)
 
 (provide 'auto-marker-list)
 ;;; auto-marker-list.el ends here
