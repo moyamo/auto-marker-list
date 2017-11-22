@@ -43,9 +43,7 @@
    (eq (marker-buffer a) (marker-buffer b))
    (>= 1 (abs (- (line-number-at-pos (marker-position a))
                  (line-number-at-pos (marker-position b)))))))
-(setq a (point-marker))
-(setq b (point-marker))
-(aml--markers-are-close a b)
+
 (defun marker-equal (a b)
   (and
    (eq (marker-buffer a) (marker-buffer b))
@@ -61,14 +59,11 @@
           (cond
            ((and aml--marker-forward
                  (marker-equal new-mark (car aml--marker-forward)))
-            (message "Marker forward")
             (aml--move-right))
            ((and aml--marker-backward
                  (marker-equal new-mark (car aml--marker-backward)))
-            (message "Marker backward")
             (aml--move-left))
            (t
-            (message "Large movement")
             (push aml--marker-current aml--marker-backward)
             (setq aml--marker-current new-mark))))))))
 
