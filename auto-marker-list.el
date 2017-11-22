@@ -28,9 +28,22 @@
 
 (defvar aml--marker-zipper '(nil . nil))
 (defvar aml--marker-before nil)
+(defvar aml-ignore-functions '(aml-jump-backward aml-jump-forward))
 
 (defun aml--add-left (zipper item)
   (setcar zipper (cons item (car zipper))))
+
+(defun aml--move-left (zipper)
+  (let* ((left (car zipper))
+         (right (cdr zipper)))
+    (setcar zipper (cdr left))
+    (setcdr zipper (cons (car left) right))))
+
+(defun aml--move-right (zipper)
+  (let* ((left (car zipper))
+         (right (cdr zipper)))
+    (setcar zipper (cons (car right) left))
+    (setcdr zipper (cdr right))))
 
 (defun aml--positions-are-close (a b)
   (>= 1 (abs (- (line-number-at-pos a) (line-number-at-pos b)))))
@@ -40,9 +53,34 @@
 
 (defun aml--post-command ()
   (let ((current-position (point))
-        (previous-position (marker-position aml--marker-before)))
-    (unless (aml--positions-are-close previous-position current-position)
+        (previous-position (marker-position aml--marker-before))
+        (previous-buffer (marker-buffer aml--marker-before)))
+    (unless (or (aml--positions-are-close previous-position current-position)
+                (minibufferp previous-buffer)
+                (memq this-command aml-ignore-functions))
       (aml--add-left aml--marker-zipper aml--marker-before))))
+
+(defun aml--goto-marker (marker)
+  (switch-to-buffer (marker-buffer marker))
+  (goto-char (marker-position marker)))
+
+(defun aml-jump-backward ()
+  (interactive)
+  (let ((left (car aml--marker-zipper)))
+    (when left
+      (aml--move-left aml--marker-zipper)
+      (aml--goto-marker (car left)))
+    (unless left
+      (message "No more previous markers"))))
+
+(defun aml-jump-forward ()
+  (interactive)
+  (let ((right (cdr aml--marker-zipper)))
+    (when right
+      (aml--move-right aml--marker-zipper)
+      (aml--goto-marker (car right)))
+    (unless right
+      (message "No more next markers"))))
 
 (add-hook 'pre-command-hook #'aml--pre-command)
 (add-hook 'post-command-hook #'aml--post-command)
