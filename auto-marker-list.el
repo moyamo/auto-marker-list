@@ -64,7 +64,9 @@
                  (marker-equal new-mark (car aml--marker-backward)))
             (aml--move-left))
            (t
-            (push aml--marker-current aml--marker-backward)
+            (if (or (null aml--marker-backward)
+                    (not (marker-equal (car aml--marker-backward) aml--marker-current)))
+                (push aml--marker-current aml--marker-backward))
             (setq aml--marker-current new-mark))))))))
 
 (defun aml--goto-marker (marker)
