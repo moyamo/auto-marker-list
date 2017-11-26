@@ -56,18 +56,8 @@
       (let ((new-mark (point-marker)))
         (if (aml--markers-are-close new-mark aml--marker-current)
             (setq aml--marker-current new-mark)
-          (cond
-           ((and aml--marker-forward
-                 (marker-equal new-mark (car aml--marker-forward)))
-            (aml--move-right))
-           ((and aml--marker-backward
-                 (marker-equal new-mark (car aml--marker-backward)))
-            (aml--move-left))
-           (t
-            (if (or (null aml--marker-backward)
-                    (not (marker-equal (car aml--marker-backward) aml--marker-current)))
-                (push aml--marker-current aml--marker-backward))
-            (setq aml--marker-current new-mark))))))))
+          (push aml--marker-current aml--marker-backward)
+          (setq aml--marker-current new-mark))))))
 
 (defun aml--goto-marker (marker)
   (switch-to-buffer (marker-buffer marker))
@@ -75,17 +65,17 @@
 
 (defun aml-jump-backward ()
   (interactive)
-  (if aml--marker-backward
-      (aml--goto-marker (car aml--marker-backward))
-    (message "No more previous markers")))
+  (if (null aml--marker-backward)
+      (message "No more previous markers")
+    (aml--move-left)
+    (aml--goto-marker aml--marker-current)))
 
 (defun aml-jump-forward ()
   (interactive)
-  (if aml--marker-forward
-      (aml--goto-marker (car aml--marker-forward))
-    (message "No more next markers")))
-
-
+  (if (null aml--marker-forward)
+      (message "No more next markers")
+    (aml--move-right)
+    (aml--goto-marker aml--marker-current)))
 
 (add-hook 'post-command-hook #'aml--post-command)
 
