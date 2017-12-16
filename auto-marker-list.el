@@ -63,6 +63,7 @@
   (switch-to-buffer (marker-buffer marker))
   (goto-char (marker-position marker)))
 
+;;;###autoload
 (defun aml-jump-backward ()
   (interactive)
   (if (null aml--marker-backward)
@@ -70,6 +71,7 @@
     (aml--move-left)
     (aml--goto-marker aml--marker-current)))
 
+;;;###autoload
 (defun aml-jump-forward ()
   (interactive)
   (if (null aml--marker-forward)
@@ -77,7 +79,18 @@
     (aml--move-right)
     (aml--goto-marker aml--marker-current)))
 
-(add-hook 'post-command-hook #'aml--post-command)
+;;;###autoload
+(define-minor-mode auto-marker-list-mode
+  "Toggles auto marker list mode.
+
+When this mode is enabled each time you make a non-continuous
+movement a marker is saved. These markers can be traversed with
+aml-jump-backwards and aml-jump-forward."
+  nil "AML" (make-sparse-keymap)
+  :global t
+  (if auto-marker-list-mode
+      (add-hook 'post-command-hook #'aml--post-command)
+    (remove-hook 'post-command-hook #'aml--post-command)))
 
 (provide 'auto-marker-list)
 ;;; auto-marker-list.el ends here
