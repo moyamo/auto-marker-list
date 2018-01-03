@@ -69,7 +69,12 @@
   (if (null aml--marker-backward)
       (message "No more previous markers")
     (aml--move-left)
-    (aml--goto-marker aml--marker-current)))
+    ;; Delete and skip marker's pointing to dead buffers
+    (while (and aml--marker-current (null (marker-buffer aml--marker-current)))
+      (setq aml--marker-current (pop aml--marker-backward)))
+    (if aml--marker-current
+        (aml--goto-marker aml--marker-current)
+      (message "No more previous markers"))))
 
 ;;;###autoload
 (defun aml-jump-forward ()
@@ -77,7 +82,12 @@
   (if (null aml--marker-forward)
       (message "No more next markers")
     (aml--move-right)
-    (aml--goto-marker aml--marker-current)))
+    ;; Delete and skip marker's pointing to dead buffers
+    (while (and aml--marker-current (null (marker-buffer aml--marker-current)))
+      (setq aml--marker-current (pop aml--marker-forward)))
+    (if aml--marker-current
+        (aml--goto-marker aml--marker-current)
+      (message "No more next markers"))))
 
 ;;;###autoload
 (define-minor-mode auto-marker-list-mode
