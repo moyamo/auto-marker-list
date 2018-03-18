@@ -96,7 +96,7 @@
 When this mode is enabled each time you make a non-continuous
 movement a marker is saved. These markers can be traversed with
 aml-jump-backwards and aml-jump-forward."
-  nil "AML" (make-sparse-keymap)
+  nil " AML" (make-sparse-keymap)
   :global t
   (if auto-marker-list-mode
       (add-hook 'post-command-hook #'aml--post-command)
